@@ -41,14 +41,16 @@ extern "C" void UnitySendMessage(const char *, const char *, const char *);
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
 {
-    UIImage *img = [info valueForKey:UIImagePickerControllerOriginalImage];
+    UIImage *org = [info valueForKey:UIImagePickerControllerOriginalImage];
     UIImage *edited = [info valueForKey:UIImagePickerControllerEditedImage];
     
-    if(edited != nil)
-        img = edited;
+    UIImage *img = (edited != nil) ? edited : org;
     
     if(img != nil)
     {
+        if(img == org)
+            img = [self normalizedImage:img];
+        
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *path = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"temp.png"];
 
@@ -72,6 +74,17 @@ extern "C" void UnitySendMessage(const char *, const char *, const char *);
     UnitySendMessage(kGameObjectName, kMethodName, [@"" UTF8String]);
     
     [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (UIImage *)normalizedImage:(UIImage *)img
+{
+    if (img.imageOrientation == UIImageOrientationUp) return img;
+    
+    UIGraphicsBeginImageContextWithOptions(img.size, NO, img.scale);
+    [img drawInRect:(CGRect){0, 0, img.size}];
+    UIImage *normalizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return normalizedImage;
 }
 
 @end
