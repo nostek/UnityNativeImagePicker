@@ -15,6 +15,8 @@ public static class NativeImagePicker
 
 		public void CallbackSelectedImage(string url)
 		{
+			url = (string.IsNullOrEmpty(url)) ? null : url;
+
 			Callback(url);
 
 			GameObject.Destroy(this.gameObject);
