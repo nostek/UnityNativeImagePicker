@@ -18,10 +18,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-//<activity android:name="com.unityextensions.nativeimagepicker.NativeImagePickerActivity" android:theme="@android:style/Theme.Translucent"/>
 
 public class NativeImagePickerActivity extends Activity {
 
@@ -39,34 +35,28 @@ public class NativeImagePickerActivity extends Activity {
 
         boolean camera = bundle.getBoolean("fromCamera", false);
 
-        if(camera)
+        if (camera)
             fromCamera();
         else
             fromLibrary();
     }
 
-    void fromLibrary()
-    {
+    void fromLibrary() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, SELECT_IMAGE);
     }
 
-    void fromCamera()
-    {
+    void fromCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if(intent.resolveActivity(getPackageManager()) != null)
-        {
+        if (intent.resolveActivity(getPackageManager()) != null) {
             File file = null;
-            try
-            {
+            try {
                 file = createImageFile();
-            }catch(IOException e)
-            {
+            } catch (IOException e) {
                 //...
             }
 
-            if(file == null)
-            {
+            if (file == null) {
                 Fail();
                 return;
             }
@@ -74,9 +64,7 @@ public class NativeImagePickerActivity extends Activity {
             Uri uri = Uri.fromFile(file);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
             startActivityForResult(intent, SELECT_CAMERA);
-        }
-        else
-        {
+        } else {
             Fail();
         }
     }
@@ -85,44 +73,46 @@ public class NativeImagePickerActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode != Activity.RESULT_OK)
-        {
+        if (resultCode != Activity.RESULT_OK) {
             Fail();
             return;
         }
 
-        if(requestCode == SELECT_IMAGE)
-        {
-            if(data == null)
-            {
+        if (requestCode == SELECT_IMAGE) {
+            if (data == null) {
                 Fail();
                 return;
             }
 
             Uri selectedImage = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getContentResolver().query(selectedImage,filePathColumn, null, null, null);
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+            Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
             cursor.moveToFirst();
             int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
 
-            if(picturePath == null || picturePath.equals(""))
-            {
+            if (picturePath == null || picturePath.equals("")) {
                 Fail();
                 return;
             }
 
-            Success(picturePath);
+            mCurrentPhotoPath = picturePath;
+
+            boolean result = RotateAndSave();
+
+            if (result)
+                Success(mCurrentPhotoPath);
+            else
+                Fail();
 
             return;
         }
 
-        if(requestCode == SELECT_CAMERA)
-        {
+        if (requestCode == SELECT_CAMERA) {
             boolean result = RotateAndSave();
 
-            if(result)
+            if (result)
                 Success(mCurrentPhotoPath);
             else
                 Fail();
@@ -131,15 +121,13 @@ public class NativeImagePickerActivity extends Activity {
         Fail();
     }
 
-    void Fail()
-    {
+    void Fail() {
         UnityPlayer.UnitySendMessage(GameObjectName, "CallbackSelectedImage", "");
 
         finish();
     }
 
-    void Success(final String picturePath)
-    {
+    void Success(final String picturePath) {
         String path = "file:" + picturePath;
 
         UnityPlayer.UnitySendMessage(GameObjectName, "CallbackSelectedImage", path);
@@ -147,11 +135,10 @@ public class NativeImagePickerActivity extends Activity {
         finish();
     }
 
-    private Boolean RotateAndSave()
-    {
+    private Boolean RotateAndSave() {
         Bitmap bmp = BitmapFactory.decodeFile(mCurrentPhotoPath);
 
-        if(bmp == null)
+        if (bmp == null)
             return false;
 
         Matrix matrix = new Matrix();
@@ -173,45 +160,44 @@ public class NativeImagePickerActivity extends Activity {
         return true;
     }
 
-    private int Orientation()
-    {
+    private int Orientation() {
         ExifInterface exif = null;
 
-        try
-        {
+        try {
             exif = new ExifInterface(mCurrentPhotoPath);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if(exif == null)
+        if (exif == null)
             return 0;
 
         int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
         int rotate = 0;
-        switch(orientation) {
+        switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_270:
-                rotate+=90;
+                rotate += 90;
             case ExifInterface.ORIENTATION_ROTATE_180:
-                rotate+=90;
+                rotate += 90;
             case ExifInterface.ORIENTATION_ROTATE_90:
-                rotate+=90;
+                rotate += 90;
         }
         return rotate;
     }
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "temp";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
+
+        if (image.exists())
+            image.delete();
 
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
