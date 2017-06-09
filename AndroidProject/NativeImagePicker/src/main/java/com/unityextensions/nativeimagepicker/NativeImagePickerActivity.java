@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 
 import com.unity3d.player.UnityPlayer;
 
@@ -61,7 +62,8 @@ public class NativeImagePickerActivity extends Activity {
                 return;
             }
 
-            Uri uri = Uri.fromFile(file);
+            //Uri uri = Uri.fromFile(file);
+            Uri uri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", file);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
             startActivityForResult(intent, SELECT_CAMERA);
         } else {
