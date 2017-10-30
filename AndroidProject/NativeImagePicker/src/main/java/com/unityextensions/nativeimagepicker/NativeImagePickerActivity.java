@@ -130,7 +130,7 @@ public class NativeImagePickerActivity extends Activity {
     }
 
     void Success(final String picturePath) {
-        String path = "file:" + picturePath;
+        String path = "file://" + picturePath;
 
         UnityPlayer.UnitySendMessage(GameObjectName, "CallbackSelectedImage", path);
 
