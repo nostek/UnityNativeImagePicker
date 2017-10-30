@@ -1,9 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.unityextensions.nativeimagepicker">
 
-    <application
-        android:allowBackup="true"
-        android:supportsRtl="true">
+    <application>
         <activity
             android:name=".NativeImagePickerActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
