@@ -54,7 +54,7 @@ extern "C" void UnitySendMessage(const char *, const char *, const char *);
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *path = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"temp.png"];
 
-        NSString *fileUri = [NSString stringWithFormat:@"file:%@",path];
+        NSString *fileUri = [NSString stringWithFormat:@"file://%@",path];
         
         NSData *data = UIImagePNGRepresentation(img);
         [data writeToFile:path atomically:YES];
