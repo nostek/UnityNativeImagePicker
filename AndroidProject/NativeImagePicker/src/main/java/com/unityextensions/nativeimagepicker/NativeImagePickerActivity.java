@@ -1,6 +1,7 @@
 package com.unityextensions.nativeimagepicker;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -44,7 +45,13 @@ public class NativeImagePickerActivity extends Activity {
 
     void fromLibrary() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, SELECT_IMAGE);
+
+        try
+        {
+            startActivityForResult(intent, SELECT_IMAGE);
+        } catch (ActivityNotFoundException e) {
+            onActivityResult(SELECT_IMAGE, Activity.RESULT_CANCELED, intent);
+        }
     }
 
     void fromCamera() {
