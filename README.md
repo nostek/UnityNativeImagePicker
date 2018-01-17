@@ -1,9 +1,9 @@
 # UnityNativeImagePicker
-Unity plugin for getting Images from Camera roll on Android or Photo Library on Android. Also support for getting new images from the camera.
+Unity plugin for getting Images from Camera roll on Android or Photo Library on iOS. Supports taking photos with the camera.
 
 ## Known issues
 
-- App needs AndroidManifest changes if it will be running on Android 7.0 (N).
+- App needs AndroidManifest changes if it will be running on Android 7.0 (N)+.
 
 
         <provider
